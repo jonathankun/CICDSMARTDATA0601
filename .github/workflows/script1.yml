@@ -199,8 +199,10 @@ jobs:
               "max_retries": 2,
               "depends_on": [
                 {
-                  "Ingest_circuits_data"
-                  "Ingest_racing_data"
+                  "task_key": "Ingest_circuits_data"
+                },
+                {
+                  "task_key": "Ingest_racing_data"
                 }
               ]
             },
