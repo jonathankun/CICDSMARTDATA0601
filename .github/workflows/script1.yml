@@ -18,7 +18,7 @@ jobs:
         ORIGIN_HOST=${{ secrets.DATABRICKS_ORIGIN_HOST }}
         ORIGIN_TOKEN=${{ secrets.DATABRICKS_ORIGIN_TOKEN }}
         NOTEBOOK_BASE="/Workspace/Users/jonathan.rivera.2025@outlook.com/Sesion12_JJRR/ETL"
-        NOTEBOOKS=("Ingest circuits data" "Ingest racing data" "Load" "Preparacion_Ambiente" "Transform")  # Agrega más según necesitesas
+        NOTEBOOKS=("Ingest_circuits_data" "Ingest_racing_data" "Load" "Preparacion_Ambiente" "Transform")  # Agrega más según necesitesas
         mkdir -p notebooks_to_deploy
         for nb in "${NOTEBOOKS[@]}"; do
           echo "Exportando $nb en modo raw..."
@@ -141,10 +141,10 @@ jobs:
               "max_retries": 2
             },
             {
-              "task_key": "Ingest circuits data",
+              "task_key": "Ingest_circuits_data",
               "description": "Ejecuta notebook ntbk_2 con parámetros",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/Ingest circuits data",
+                "notebook_path": "/proyecto_smartdata/Ingest_circuits_data",
                 "source": "WORKSPACE",
                 "base_parameters": {
                   "inputPath": "/data/input",
@@ -162,10 +162,10 @@ jobs:
               ]
             },
             {
-              "task_key": "Ingest racing data",
+              "task_key": "Ingest_racing_data",
               "description": "Ejecuta notebook ntbk_2 con parámetros",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/Ingest racing data",
+                "notebook_path": "/proyecto_smartdata/Ingest_racing_data",
                 "source": "WORKSPACE",
                 "base_parameters": {
                   "inputPath": "/data/input",
@@ -199,8 +199,8 @@ jobs:
               "max_retries": 2,
               "depends_on": [
                 {
-                  "task_key": "Ingest circuits data" 
-                  "task_key": "Ingest racing data"
+                  "task_key": "Ingest_circuits_data" 
+                  "task_key": "Ingest_racing_data"
                 }
               ]
             },
