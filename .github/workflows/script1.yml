@@ -17,8 +17,8 @@ jobs:
       run: |
         ORIGIN_HOST=${{ secrets.DATABRICKS_ORIGIN_HOST }}
         ORIGIN_TOKEN=${{ secrets.DATABRICKS_ORIGIN_TOKEN }}
-        NOTEBOOK_BASE="/Workspace/Users/jonathan.rivera.2025@outlook.com/Sesion12_JJRR/source_ntbk"
-        NOTEBOOKS=("ntbk_1" "ntbk_2")  # Agrega más según necesitesas
+        NOTEBOOK_BASE="/Workspace/Users/jonathan.rivera.2025@outlook.com/Sesion12_JJRR/ETL"
+        NOTEBOOKS=("Ingest circuits data" "Ingest racing data" "Load" "Preparacion_Ambiente" "Transform")  # Agrega más según necesitesas
         mkdir -p notebooks_to_deploy
         for nb in "${NOTEBOOKS[@]}"; do
           echo "Exportando $nb en modo raw..."
@@ -32,7 +32,7 @@ jobs:
       run: |
         DEST_HOST=${{ secrets.DATABRICKS_DEST_HOST }}
         DEST_TOKEN=${{ secrets.DATABRICKS_DEST_TOKEN }}
-        DEST_BASE="/py/scripts/main"
+        DEST_BASE="/proyecto_smartdata/"
         for file in notebooks_to_deploy/*.py; do
           name=$(basename "$file" .py)
           dest_path="$DEST_BASE/$name"
@@ -127,32 +127,105 @@ jobs:
           "format": "MULTI_TASK",
           "tasks": [
             {
-              "task_key": "tarea1_notebook1",
-              "description": "Ejecuta notebook ntbk_1",
+              "task_key": "Preparacion_Ambiente",
+              "description": "Ejecuta notebook ntbk_1 con parámetros",
               "notebook_task": {
-                "notebook_path": "/py/scripts/main/ntbk_1",
-                "source": "WORKSPACE"
+                "notebook_path": "/proyecto_smartdata/Preparacion_Ambiente",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                  "storageLocation": "storage"
+                }
               },
               "existing_cluster_id": "$CLUSTER_ID",
               "timeout_seconds": 3600,
               "max_retries": 2
             },
             {
-              "task_key": "tarea2_notebook2",
-              "description": "Ejecuta notebook ntbk_2",
+              "task_key": "Ingest circuits data",
+              "description": "Ejecuta notebook ntbk_2 con parámetros",
               "notebook_task": {
-                "notebook_path": "/py/scripts/main/ntbk_2",
-                "source": "WORKSPACE"
+                "notebook_path": "/proyecto_smartdata/Ingest circuits data",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                  "inputPath": "/data/input",
+                  "outputPath": "/data/output",
+                  "processDate": "$(date +%Y-%m-%d)"
+                }
               },
               "existing_cluster_id": "$CLUSTER_ID",
               "timeout_seconds": 3600,
               "max_retries": 2,
               "depends_on": [
                 {
-                  "task_key": "tarea1_notebook1"
+                  "task_key": "Preparacion_Ambiente"
                 }
               ]
-            }
+            },
+            {
+              "task_key": "Ingest racing data",
+              "description": "Ejecuta notebook ntbk_2 con parámetros",
+              "notebook_task": {
+                "notebook_path": "/proyecto_smartdata/Ingest racing data",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                  "inputPath": "/data/input",
+                  "outputPath": "/data/output",
+                  "processDate": "$(date +%Y-%m-%d)"
+                }
+              },
+              "existing_cluster_id": "$CLUSTER_ID",
+              "timeout_seconds": 3600,
+              "max_retries": 2,
+              "depends_on": [
+                {
+                  "task_key": "Preparacion_Ambiente"
+                }
+              ]
+            },
+            {
+              "task_key": "Transform",
+              "description": "Ejecuta notebook ntbk_2 con parámetros",
+              "notebook_task": {
+                "notebook_path": "/proyecto_smartdata/Transform",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                  "inputPath": "/data/input",
+                  "outputPath": "/data/output",
+                  "processDate": "$(date +%Y-%m-%d)"
+                }
+              },
+              "existing_cluster_id": "$CLUSTER_ID",
+              "timeout_seconds": 3600,
+              "max_retries": 2,
+              "depends_on": [
+                {
+                  "task_key": "Ingest circuits data" 
+                  "task_key": "Ingest racing data"
+                }
+              ]
+            },
+            {
+              "task_key": "Load",
+              "description": "Ejecuta notebook ntbk_2 con parámetros",
+              "notebook_task": {
+                "notebook_path": "/proyecto_smartdata/Load",
+                "source": "WORKSPACE",
+                "base_parameters": {
+                  "inputPath": "/data/input",
+                  "outputPath": "/data/output",
+                  "processDate": "$(date +%Y-%m-%d)"
+                }
+              },
+              "existing_cluster_id": "$CLUSTER_ID",
+              "timeout_seconds": 3600,
+              "max_retries": 2,
+              "depends_on": [
+                {
+                  "task_key": "Transform"
+                }
+              ]
+            }                        
+
           ],
           "schedule": {
             "quartz_cron_expression": "0 0 8 * * ?",
